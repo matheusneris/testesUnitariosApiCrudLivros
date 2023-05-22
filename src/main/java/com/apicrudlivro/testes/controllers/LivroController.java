@@ -4,14 +4,12 @@ import com.apicrudlivro.testes.models.LivroModel;
 import com.apicrudlivro.testes.requests.LivroRequest;
 import com.apicrudlivro.testes.services.LivroService;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +33,7 @@ public class LivroController {
         LivroModel livroModel = transformarDataStringToLocalDate(livroRequest);
 
         try {
-            validadorRequisitosLivro(livroModel);
+            validadorRequisitosLivroParaSalvar(livroModel);
             return ResponseEntity.status(HttpStatus.OK).body(livroService.salvarLivro(livroModel));
         }catch (Exception ex){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
@@ -77,7 +75,7 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.OK).body("Livro deletado com sucesso");
     }
 
-    private LivroModel transformarDataStringToLocalDate(LivroRequest livroRequest){
+    public LivroModel transformarDataStringToLocalDate(LivroRequest livroRequest){
         LivroModel livroModel = new LivroModel();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -92,7 +90,7 @@ public class LivroController {
         return livroModel;
     }
 
-    private void validadorRequisitosLivro(LivroModel livroModel) throws Exception {
+    public void validadorRequisitosLivroParaSalvar(LivroModel livroModel) throws Exception {
         if(livroModel.getPreco() == null){
             throw new Exception("Preco e obrigatorio");
         } else if (livroModel.getPreco().compareTo(BigDecimal.valueOf(20))< 0) {
@@ -103,7 +101,7 @@ public class LivroController {
             throw new Exception("O minimo de paginas e 100");
         }
 
-        if(livroModel.getDataPublicacao().isBefore(LocalDate.now())){
+        if(livroModel.getDataPublicacao().isBefore(LocalDate.now().plusDays(1))){
             throw new Exception("Data de publicacao deve ser no futuro");
         }
     }
